@@ -16,27 +16,46 @@ def ping(host: str) -> bool:
         return False
 
 def telnet(host: str, username: str, password: str) -> telnetlib.Telnet:
-    print(f"Trying Telnet connection to {host} with username {username} and password {password}")
+    print(f"Trying Telnet connection to {host}")
     try:
-        client = telnetlib.Telnet(host)
-        client.write(username.encode('ascii') + b"\n")
+        client = telnetlib.Telnet(host, timeout=2)
         if password:
+            client.write(username.encode('ascii') + b"\n")
             client.write(password.encode('ascii') + b"\n")
         return client
+    
     except Exception as e:
         log.error(f"Telnet connection to {host} failed: {e}")
         return None
 
+
 def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
-    print(f"Trying SSH connection to {host} with username {username} and password {password}")
+    print(f"Trying SSH connection to {host}")
     try:
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=host, username=username, password=password, timeout=5)
-        return client
+        try:
+            client.load_system_host_keys()
+            client.connect(hostname=host, username=username, password=password, timeout=5, allow_agent=False)
+            if client.get_transport().is_authenticated():
+                return client
+            else:
+                return None
+        except paramiko.AuthenticationException:
+            try:
+                client.connect(hostname=host, username=username, password=password, timeout=5)
+                if client.get_transport().is_authenticated():
+                    return client
+                else:
+                    return None
+            except Exception as e:
+                log.error(f"SSH connection to {host} failed: {e}")
+                return None
+
     except Exception as e:
         log.error(f"SSH connection to {host} failed: {e}")
         return None
+
     
 def connect(args) -> None:
     host, username, password = args.host, args.username, args.password
@@ -49,6 +68,6 @@ def connect(args) -> None:
         connection = connect_func(host, username, password)
         if connection:
             print(f"{connect_func.__name__.capitalize()} connection successful")
-            return
+            return connection
 
     log.error(f"Failed to connect to {host}")
