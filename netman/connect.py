@@ -59,11 +59,17 @@ def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
     
 def connect(args) -> None:
     host, username, password = args.host, args.username, args.password
+
     if not ping(host):
         log.error(f"Failed to connect to {host}")
         return
-    
+
+    connection_type = args.connection.lower() if args.connection else None
     connect_functions = [telnet, ssh]
+
+    if connection_type:
+        connect_functions = [func for func in connect_functions if func.__name__.lower() == connection_type]
+
     for connect_func in connect_functions:
         connection = connect_func(host, username, password)
         if connection:
