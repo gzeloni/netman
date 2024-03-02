@@ -2,7 +2,6 @@ import telnetlib
 import paramiko
 import platform
 import subprocess
-import logging as log
 from netman.config import CONFIGURATIONS
 
 def ping(host: str) -> bool:
@@ -12,7 +11,6 @@ def ping(host: str) -> bool:
         need_sh = platform.system().lower() != "windows"
         return subprocess.run(cmd, shell=need_sh, capture_output=True, check=True).returncode == 0
     except Exception as e:
-        log.error(f"{host}: {e}")
         return False
 
 def telnet(host: str, username: str, password: str) -> telnetlib.Telnet:
@@ -24,7 +22,6 @@ def telnet(host: str, username: str, password: str) -> telnetlib.Telnet:
             client.write((password + "\n").encode('ascii'))
         return client
     except Exception as e:
-        log.error(f"Telnet connection to {host} failed: {e}")
         return None
 
 def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
@@ -41,17 +38,14 @@ def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
                 client.connect(hostname=host, username=username, password=password, timeout=5)
                 return client if client.get_transport().is_authenticated() else None
             except Exception as e:
-                log.error(f"SSH connection to {host} failed: {e}")
                 return None
     except Exception as e:
-        log.error(f"SSH connection to {host} failed: {e}")
         return None
 
 def connect(args) -> None:
     host, username, password = args.host, args.username, args.password
 
     if not ping(host):
-        log.error(f"Failed to connect to {host}")
         return
 
     connection_type = args.connection.lower() if args.connection else None
