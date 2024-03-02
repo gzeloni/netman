@@ -1,12 +1,12 @@
-from netman.parse_args import parser
+from netman.parse_args import create_parser
 from netman.connect import connect
 from netman.exec_command import CommandExec
 
 def main():
     try:
-        args = parser()
-        con = connect(args=args)
-        executor = CommandExec(con)
+        args = create_parser()
+        connection = connect(args=args)
+        executor = CommandExec(connection)
         print("Type 'exit' to leave\n")
         while True:
             user_input = input("> ")
