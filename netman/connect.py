@@ -30,7 +30,7 @@ def ssh(host: str, username: str, password: str) -> Union[paramiko.SSHClient, No
 
         try:
             client.load_system_host_keys()
-            client.connect(hostname=host, username=username, password=password, timeout=5, allow_agent=False)
+            client.connect(hostname=host, username=username, timeout=5, allow_agent=False)
         except paramiko.AuthenticationException:
             try:
                 client.connect(hostname=host, username=username, password=password, timeout=5)
