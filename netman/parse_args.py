@@ -2,7 +2,7 @@ import argparse
 import getpass
 from netman.config import CONFIGURATIONS
 
-def create_parser():
+def parse_args():
     parser = argparse.ArgumentParser(description="NetMan - Streamlining switch configurations.")
 
     for config in CONFIGURATIONS:

@@ -1,10 +1,10 @@
-from netman.parse_args import create_parser
+from netman.parse_args import parse_args
 from netman.connect import connect
 from netman.exec_command import CommandExec
 
 def main():
     try:
-        args = create_parser()
+        args = parse_args()
         connection = connect(args=args)
         executor = CommandExec(connection)
         print("Type 'exit' to leave\n")
