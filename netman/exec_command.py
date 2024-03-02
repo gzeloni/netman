@@ -13,14 +13,14 @@ class CommandExec:
             raise ValueError("Unsupported connection type")
 
     def _exec_telnet_command(self, command):
-        self.connection.write(command.encode('ascii') + b"\n")
-        output = self.connection.read_until(b">")
-        return output.decode('ascii')
+        self.connection.write(f"{command}\n".encode('ascii'))
+        output = self.connection.read_until(b">").decode('ascii')
+        return output
 
     def _exec_ssh_command(self, command):
         stdin, stdout, stderr = self.connection.exec_command(command)
-        output = stdout.read()
-        return output.decode('utf-8')
+        output = stdout.read().decode('utf-8')
+        return output
 
     def exec_command(self, command):
         return self.command_methods[type(self.connection)](command)

@@ -20,14 +20,12 @@ def telnet(host: str, username: str, password: str) -> telnetlib.Telnet:
     try:
         client = telnetlib.Telnet(host, timeout=2)
         if password:
-            client.write(username.encode('ascii') + b"\n")
-            client.write(password.encode('ascii') + b"\n")
+            client.write((username + "\n").encode('ascii'))
+            client.write((password + "\n").encode('ascii'))
         return client
-    
     except Exception as e:
         log.error(f"Telnet connection to {host} failed: {e}")
         return None
-
 
 def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
     print(f"Trying SSH connection to {host}")
@@ -37,26 +35,18 @@ def ssh(host: str, username: str, password: str) -> paramiko.SSHClient:
         try:
             client.load_system_host_keys()
             client.connect(hostname=host, username=username, password=password, timeout=5, allow_agent=False)
-            if client.get_transport().is_authenticated():
-                return client
-            else:
-                return None
+            return client if client.get_transport().is_authenticated() else None
         except paramiko.AuthenticationException:
             try:
                 client.connect(hostname=host, username=username, password=password, timeout=5)
-                if client.get_transport().is_authenticated():
-                    return client
-                else:
-                    return None
+                return client if client.get_transport().is_authenticated() else None
             except Exception as e:
                 log.error(f"SSH connection to {host} failed: {e}")
                 return None
-
     except Exception as e:
         log.error(f"SSH connection to {host} failed: {e}")
         return None
 
-    
 def connect(args) -> None:
     host, username, password = args.host, args.username, args.password
 
