@@ -4,6 +4,7 @@ import paramiko
 import platform
 import subprocess
 from netman.config import CONFIGURATIONS
+from netman.modules.snmp import Snmp
 
 def ping(host: str) -> bool:
     try:
@@ -41,11 +42,15 @@ def ssh(host: str, username: str, password: str) -> Union[paramiko.SSHClient, No
     except Exception:
         return None
 
+def snmp(host: str, community: str, oid: str) -> Union[paramiko.SSHClient, None]:
+    try:
+        client = Snmp(addr=host, community=community)
+
 def connect(args) -> Union[telnetlib.Telnet, paramiko.SSHClient, None]:
     host, username, password = args.host, args.username, args.password
 
     if not ping(host):
-        return None
+        raise Exception("Host unreachable.")
 
     connection_type = args.connection.lower() if args.connection else None
     connect_functions = [telnet, ssh]
